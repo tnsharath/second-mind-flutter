@@ -33,6 +33,9 @@ def patch_groovy(text: str) -> str:
                 count=1,
                 flags=re.MULTILINE,
             )
+        # No dependencies block at all: append one at the end
+        if 'coreLibraryDesugaring' not in text:
+            text = text.rstrip() + '\n\ndependencies {\n' + dep + '}\n'
     return text
 
 
@@ -62,6 +65,9 @@ def patch_kotlin(text: str) -> str:
                 count=1,
                 flags=re.MULTILINE,
             )
+        # No dependencies block at all: append one at the end
+        if 'coreLibraryDesugaring' not in text:
+            text = text.rstrip() + '\n\ndependencies {\n' + dep + '}\n'
     return text
 
 
