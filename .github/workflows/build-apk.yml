@@ -40,6 +40,9 @@ jobs:
       - name: Patch AndroidManifest (permissions + queries)
         run: python3 tool/patch_android_manifest.py
 
+      - name: Patch Android build.gradle (desugaring)
+        run: python3 tool/patch_android_build_gradle.py
+
       - name: Install dependencies
         run: flutter pub get
 
