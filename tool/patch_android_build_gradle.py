@@ -14,9 +14,10 @@ def patch_groovy(text: str) -> str:
             1,
         )
     if 'coreLibraryDesugaring' not in text:
+        dep = "    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'\n"
         text = text.replace(
-            'dependencies {\n}',
-            "dependencies {\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'\n}\n",
+            'dependencies {\n',
+            'dependencies {\n' + dep,
             1,
         )
     return text
@@ -30,9 +31,10 @@ def patch_kotlin(text: str) -> str:
             1,
         )
     if 'coreLibraryDesugaring' not in text:
+        dep = '    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n'
         text = text.replace(
-            'dependencies {\n}',
-            'dependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n',
+            'dependencies {\n',
+            'dependencies {\n' + dep,
             1,
         )
     return text
