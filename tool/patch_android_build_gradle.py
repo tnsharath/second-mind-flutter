@@ -1,5 +1,6 @@
 """Enables core library desugaring in the `flutter create`-generated
 android/app/build.gradle(.kts). Required by flutter_local_notifications. Idempotent."""
+import re
 from pathlib import Path
 
 BUILD_GRADLE = Path('android/app/build.gradle')
@@ -15,11 +16,23 @@ def patch_groovy(text: str) -> str:
         )
     if 'coreLibraryDesugaring' not in text:
         dep = "    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'\n"
-        text = text.replace(
-            'dependencies {\n',
-            'dependencies {\n' + dep,
-            1,
+        # Empty block on one line: dependencies {}
+        text = re.sub(
+            r'^(\s*)dependencies\s*\{\s*\}\s*$',
+            r'\1dependencies {\n' + dep + r'\1}\n',
+            text,
+            count=1,
+            flags=re.MULTILINE,
         )
+        # Non-empty or multi-line block: append after the opening brace
+        if 'coreLibraryDesugaring' not in text:
+            text = re.sub(
+                r'^(\s*)dependencies\s*\{\s*$',
+                r'\1dependencies {\n' + dep,
+                text,
+                count=1,
+                flags=re.MULTILINE,
+            )
     return text
 
 
@@ -32,11 +45,23 @@ def patch_kotlin(text: str) -> str:
         )
     if 'coreLibraryDesugaring' not in text:
         dep = '    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n'
-        text = text.replace(
-            'dependencies {\n',
-            'dependencies {\n' + dep,
-            1,
+        # Empty block on one line: dependencies {}
+        text = re.sub(
+            r'^(\s*)dependencies\s*\{\s*\}\s*$',
+            r'\1dependencies {\n' + dep + r'\1}\n',
+            text,
+            count=1,
+            flags=re.MULTILINE,
         )
+        # Non-empty or multi-line block: append after the opening brace
+        if 'coreLibraryDesugaring' not in text:
+            text = re.sub(
+                r'^(\s*)dependencies\s*\{\s*$',
+                r'\1dependencies {\n' + dep,
+                text,
+                count=1,
+                flags=re.MULTILINE,
+            )
     return text
 
 
@@ -62,9 +87,18 @@ def main() -> None:
             print('  android/ directory does not exist.')
         raise SystemExit(1)
 
-    text = target.read_text()
-    text = patcher(text)
-    target.write_text(text)
+    original = target.read_text()
+    print(f'--- {target} (before patch) ---')
+    print(original)
+    print('--- end ---')
+
+    patched = patcher(original)
+
+    print(f'--- {target} (after patch) ---')
+    print(patched)
+    print('--- end ---')
+
+    target.write_text(patched)
     print(f'{target} patched for core library desugaring.')
 
 
