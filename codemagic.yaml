@@ -1,0 +1,25 @@
+workflows:
+  android-apk:
+    name: Android APK
+    max_build_duration: 30
+    environment:
+      flutter: stable
+      vars:
+        API_BASE_URL: https://api.aura.example.com
+        USE_MOCK_API: 'true'
+    scripts:
+      - name: Generate Android platform scaffolding
+        script: flutter create --platforms android --project-name aura --org com.aura .
+      - name: Patch AndroidManifest (permissions + queries)
+        script: python3 tool/patch_android_manifest.py
+      - name: Install dependencies
+        script: flutter pub get
+      - name: Generate code (freezed / json_serializable)
+        script: dart run build_runner build --delete-conflicting-outputs
+      - name: Build release APK (split per ABI)
+        script: |
+          flutter build apk --release --split-per-abi \
+            --dart-define=API_BASE_URL=$API_BASE_URL \
+            --dart-define=USE_MOCK_API=$USE_MOCK_API
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
