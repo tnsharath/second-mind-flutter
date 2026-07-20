@@ -1,11 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/env.dart';
+import '../../../core/providers/providers.dart';
+import '../data/api_memory_repository.dart';
 import '../data/mock_memory_repository.dart';
 import '../domain/memory_item.dart';
 import '../domain/memory_repository.dart';
 
 final memoryRepositoryProvider = Provider<MemoryRepository>(
-  (ref) => MockMemoryRepository(),
+  (ref) => Env.useMockApi
+      ? MockMemoryRepository()
+      : ApiMemoryRepository(ref.watch(apiClientProvider)),
 );
 
 final memoriesProvider = FutureProvider<List<MemoryItem>>(

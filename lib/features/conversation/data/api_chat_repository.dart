@@ -30,7 +30,13 @@ class ApiChatRepository implements ChatRepository {
     final data = response.data ?? const [];
     return data
         .whereType<Map<String, dynamic>>()
-        .map(Conversation.fromJson)
+        .map((json) => Conversation.fromJson(_normalizeId(json)))
         .toList();
   }
 }
+
+/// Backend ids may be integers; the Dart models use String ids.
+Map<String, dynamic> _normalizeId(Map<String, dynamic> json) => {
+      ...json,
+      'id': json['id'].toString(),
+    };

@@ -32,7 +32,7 @@ class WeatherCard extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'High ${info.highC?.round() ?? '—'}° · Low ${info.lowC?.round() ?? '—'}° · placeholder data',
+                    'High ${info.highC?.round() ?? '—'}° · Low ${info.lowC?.round() ?? '—'}°',
                     style: theme.textTheme.bodySmall,
                   ),
                 ],

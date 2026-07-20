@@ -1,11 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/env.dart';
+import '../../../core/providers/providers.dart';
+import '../data/api_goals_repository.dart';
 import '../data/mock_goals_repository.dart';
 import '../domain/goal.dart';
 import '../domain/goals_repository.dart';
 
 final goalsRepositoryProvider = Provider<GoalsRepository>(
-  (ref) => MockGoalsRepository(),
+  (ref) => Env.useMockApi
+      ? MockGoalsRepository()
+      : ApiGoalsRepository(ref.watch(apiClientProvider)),
 );
 
 final todayGoalsProvider = AsyncNotifierProvider<GoalsController, List<Goal>>(

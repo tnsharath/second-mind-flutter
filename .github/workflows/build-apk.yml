@@ -8,11 +8,11 @@ on:
       api_base_url:
         description: Backend API base URL (baked in via --dart-define)
         required: false
-        default: https://api.aura.example.com
+        default: https://second-mind-backend.vercel.app
       use_mock_api:
         description: Use mock repositories instead of the real backend (true/false)
         required: false
-        default: 'true'
+        default: 'false'
 
 jobs:
   build:
@@ -55,8 +55,8 @@ jobs:
       - name: Build release APK (split per ABI)
         run: |
           flutter build apk --release --split-per-abi \
-            --dart-define=API_BASE_URL=${{ github.event.inputs.api_base_url || 'https://api.aura.example.com' }} \
-            --dart-define=USE_MOCK_API=${{ github.event.inputs.use_mock_api || 'true' }}
+            --dart-define=API_BASE_URL=${{ github.event.inputs.api_base_url || 'https://second-mind-backend.vercel.app' }} \
+            --dart-define=USE_MOCK_API=${{ github.event.inputs.use_mock_api || 'false' }}
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4

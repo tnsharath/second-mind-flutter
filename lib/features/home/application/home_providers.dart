@@ -1,17 +1,19 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/providers/providers.dart';
 import '../../memory/application/memory_providers.dart';
 import '../../memory/domain/memory_item.dart';
+import '../data/api_home_repository.dart';
 import '../data/mock_home_repository.dart';
 import '../domain/home_repository.dart';
 import '../domain/weather_info.dart';
 
 final homeRepositoryProvider = Provider<HomeRepository>(
-  (ref) => MockHomeRepository(),
-  // TODO(backend): when Env.useMockApi is false, provide an
-  // ApiHomeRepository(ref.watch(apiClientProvider)) calling GET /context.
+  (ref) => Env.useMockApi
+      ? MockHomeRepository()
+      : ApiHomeRepository(ref.watch(apiClientProvider)),
 );
 
 final todaySummaryProvider = FutureProvider<String>(

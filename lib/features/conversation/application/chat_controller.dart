@@ -36,8 +36,11 @@ final chatControllerProvider = NotifierProvider<ChatController, ChatState>(
 );
 
 class ChatController extends Notifier<ChatState> {
-  static const String _localConversationId = 'local';
   final Uuid _uuid = const Uuid();
+
+  /// Per-session conversation id so server-side history is scoped to
+  /// this app session.
+  late final String _conversationId = _uuid.v4();
 
   @override
   ChatState build() => const ChatState();
@@ -68,7 +71,7 @@ class ChatController extends Notifier<ChatState> {
     final buffer = StringBuffer();
     try {
       await for (final chunk in ref.read(chatRepositoryProvider).sendMessage(
-        conversationId: _localConversationId,
+        conversationId: _conversationId,
         text: text,
       )) {
         buffer.write(chunk);
