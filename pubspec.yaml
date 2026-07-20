@@ -53,6 +53,17 @@ dev_dependencies:
   freezed: ^2.5.8
   json_serializable: ^6.9.0
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
+
+# Run `dart run flutter_launcher_icons` after `flutter create` generates
+# the platform scaffolding (done automatically in CI).
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icon/app_icon.png
+  adaptive_icon_background: "#0D1117"
+  adaptive_icon_foreground: assets/icon/adaptive_fg.png
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true
