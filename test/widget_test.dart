@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:aura/app.dart';
+import 'package:aura/core/providers/providers.dart';
 import 'package:aura/features/briefing/application/briefing_providers.dart';
 import 'package:aura/features/briefing/data/mock_briefing_repository.dart';
 import 'package:aura/features/calendar/application/calendar_providers.dart';
@@ -19,10 +21,15 @@ import 'package:aura/features/memory/data/mock_memory_repository.dart';
 void main() {
   testWidgets('AuraApp builds and renders a MaterialApp', (WidgetTester tester) async {
     // Keep the test hermetic: force the mock repositories regardless of
-    // Env.useMockApi so nothing reaches the network.
+    // Env.useMockApi so nothing reaches the network. main() normally
+    // overrides sharedPreferencesProvider with the real instance.
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
           homeRepositoryProvider.overrideWithValue(MockHomeRepository()),
           goalsRepositoryProvider.overrideWithValue(MockGoalsRepository()),
           calendarRepositoryProvider.overrideWithValue(MockCalendarRepository()),
