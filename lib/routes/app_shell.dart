@@ -24,11 +24,18 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isHome = navigationShell.currentIndex == 0;
+
     return Scaffold(
       body: navigationShell,
-      floatingActionButton:
-          _VoiceFab(onTap: () => context.push(AppRoutes.voice)),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: AnimatedScale(
+        scale: isHome ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 200),
+        child: isHome
+            ? _VoiceFab(onTap: () => context.push(AppRoutes.voice))
+            : const SizedBox.shrink(),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _onTabSelected,
