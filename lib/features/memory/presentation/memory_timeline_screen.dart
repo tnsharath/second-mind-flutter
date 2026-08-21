@@ -10,6 +10,7 @@ import '../../../core/shared/widgets/aura_text_field.dart';
 import '../../../core/utils/time_format.dart';
 import '../application/memory_providers.dart';
 import '../domain/memory_item.dart';
+import 'widgets/memory_detail_sheet.dart';
 
 class MemoryTimelineScreen extends HookConsumerWidget {
   const MemoryTimelineScreen({super.key});
@@ -110,6 +111,7 @@ class _MemoryTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: AuraCard(
         padding: const EdgeInsets.all(14),
+        onTap: () => MemoryDetailSheet.show(context, memory),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

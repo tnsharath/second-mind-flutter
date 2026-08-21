@@ -7,6 +7,7 @@ import '../../../../core/shared/widgets/aura_loading.dart';
 import '../../../../core/shared/widgets/section_header.dart';
 import '../../../../core/utils/time_format.dart';
 import '../../../../routes/app_router.dart';
+import '../../../memory/presentation/widgets/memory_detail_sheet.dart';
 import '../../application/home_providers.dart';
 
 class MemoryHighlightsCard extends HookConsumerWidget {
@@ -35,29 +36,33 @@ class MemoryHighlightsCard extends HookConsumerWidget {
               return Column(
                 children: [
                   for (final memory in list)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.auto_awesome_rounded,
-                            size: 16,
-                            color: theme.colorScheme.secondary,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              memory.title,
-                              style: theme.textTheme.bodyMedium,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                    InkWell(
+                      onTap: () => MemoryDetailSheet.show(context, memory),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.auto_awesome_rounded,
+                              size: 16,
+                              color: theme.colorScheme.secondary,
                             ),
-                          ),
-                          Text(
-                            formatRelative(memory.timestamp),
-                            style: theme.textTheme.bodySmall,
-                          ),
-                        ],
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                memory.title,
+                                style: theme.textTheme.bodyMedium,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              formatRelative(memory.timestamp),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                 ],

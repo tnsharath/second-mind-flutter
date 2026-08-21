@@ -1,17 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/providers/providers.dart';
-import '../data/api_chat_repository.dart';
+import '../../../core/services/memory_capture_service.dart';
 import '../data/mock_chat_repository.dart';
+import '../data/sse_chat_repository.dart';
 import '../domain/chat_message.dart';
 import '../domain/chat_repository.dart';
 
 final chatRepositoryProvider = Provider<ChatRepository>(
   (ref) => Env.useMockApi
       ? MockChatRepository()
-      : ApiChatRepository(ref.watch(apiClientProvider)),
+      : SseChatRepository(ref.watch(apiClientProvider)),
+);
+
+final memoryCaptureServiceProvider = Provider<MemoryCaptureService>(
+  (ref) => MemoryCaptureService.withRef(ref),
 );
 
 class ChatState {
@@ -90,6 +97,14 @@ class ChatController extends Notifier<ChatState> {
       );
     } finally {
       state = state.copyWith(isResponding: false);
+      unawaited(_maybeCaptureMemory(text));
+    }
+  }
+
+  Future<void> _maybeCaptureMemory(String text) async {
+    final capture = ref.read(memoryCaptureServiceProvider);
+    if (capture.shouldCapture(text)) {
+      await capture.capture(text);
     }
   }
 

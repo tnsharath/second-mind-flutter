@@ -28,6 +28,36 @@ class ApiClient {
     }
   }
 
+  /// POST returning the raw byte stream (e.g. SSE endpoints). Callers read
+  /// `response.data.stream` and parse chunks themselves.
+  Future<Response<ResponseBody>> postStream(String path, {Object? body}) async {
+    try {
+      return await _dio.post<ResponseBody>(
+        path,
+        data: body,
+        options: Options(responseType: ResponseType.stream),
+      );
+    } on DioException catch (e) {
+      throw AppFailure(_describe(e), cause: e);
+    }
+  }
+
+  Future<Response<T>> patch<T>(String path, {Object? body}) async {
+    try {
+      return await _dio.patch<T>(path, data: body);
+    } on DioException catch (e) {
+      throw AppFailure(_describe(e), cause: e);
+    }
+  }
+
+  Future<Response<T>> delete<T>(String path) async {
+    try {
+      return await _dio.delete<T>(path);
+    } on DioException catch (e) {
+      throw AppFailure(_describe(e), cause: e);
+    }
+  }
+
   String _describe(DioException e) {
     if (e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout) {

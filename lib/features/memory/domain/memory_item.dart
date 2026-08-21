@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'memory_item.freezed.dart';
 part 'memory_item.g.dart';
 
-enum MemoryCategory { event, goal, preference, note, milestone }
+enum MemoryCategory { event, goal, preference, note, milestone, reflection }
 
 @freezed
 class MemoryItem with _$MemoryItem {

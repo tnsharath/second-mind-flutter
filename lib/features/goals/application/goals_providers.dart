@@ -23,6 +23,51 @@ class GoalsController extends AsyncNotifier<List<Goal>> {
   @override
   Future<List<Goal>> build() => _repository.getTodayGoals();
 
+  Future<void> create({
+    required String title,
+    String? description,
+    DateTime? dueDate,
+  }) async {
+    final current = state.valueOrNull ?? const <Goal>[];
+    try {
+      final created = await _repository.createGoal(
+        title: title,
+        description: description,
+        dueDate: dueDate,
+      );
+      state = AsyncData([...current, created]);
+    } catch (_) {
+      state = AsyncData(current);
+    }
+  }
+
+  Future<void> updateGoal(Goal goal) async {
+    final current = state.valueOrNull ?? const <Goal>[];
+    state = AsyncData([
+      for (final g in current) if (g.id == goal.id) goal else g,
+    ]);
+    try {
+      final updated = await _repository.updateGoal(goal);
+      state = AsyncData([
+        for (final g in state.valueOrNull ?? current)
+          if (g.id == updated.id) updated else g,
+      ]);
+    } catch (_) {
+      state = AsyncData(current);
+    }
+  }
+
+  /// Optimistic delete with rollback on failure.
+  Future<void> delete(Goal goal) async {
+    final current = state.valueOrNull ?? const <Goal>[];
+    state = AsyncData(current.where((g) => g.id != goal.id).toList());
+    try {
+      await _repository.deleteGoal(goal.id);
+    } catch (_) {
+      state = AsyncData(current);
+    }
+  }
+
   /// Optimistic toggle with rollback on failure.
   Future<void> toggle(Goal goal) async {
     final current = state.valueOrNull ?? const <Goal>[];

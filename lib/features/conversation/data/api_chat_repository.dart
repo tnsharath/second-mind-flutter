@@ -4,8 +4,8 @@ import '../domain/conversation.dart';
 
 /// Real backend implementation — used when USE_MOCK_API=false.
 ///
-/// TODO(backend): replace the single-shot POST with streaming (SSE/WS)
-/// once the FastAPI /chat endpoint supports it.
+/// Kept for backwards compatibility; prefer [SseChatRepository] for
+/// streaming replies.
 class ApiChatRepository implements ChatRepository {
   ApiChatRepository(this._client);
 

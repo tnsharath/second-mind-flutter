@@ -19,6 +19,42 @@ class ApiGoalsRepository implements GoalsRepository {
   }
 
   @override
+  Future<Goal> createGoal({
+    required String title,
+    String? description,
+    DateTime? dueDate,
+  }) async {
+    final response = await _client.post<Map<String, dynamic>>(
+      '/goals',
+      body: {
+        'title': title,
+        if (description != null) 'description': description,
+        if (dueDate != null) 'dueDate': dueDate.toIso8601String(),
+      },
+    );
+    return Goal.fromJson(_normalizeId(response.data ?? const {}));
+  }
+
+  @override
+  Future<Goal> updateGoal(Goal goal) async {
+    final response = await _client.patch<Map<String, dynamic>>(
+      '/goals/${goal.id}',
+      body: {
+        'title': goal.title,
+        if (goal.description != null) 'description': goal.description,
+        'isCompleted': goal.isCompleted,
+        if (goal.dueDate != null) 'dueDate': goal.dueDate!.toIso8601String(),
+      },
+    );
+    return Goal.fromJson(_normalizeId(response.data ?? const {}));
+  }
+
+  @override
+  Future<void> deleteGoal(String id) async {
+    await _client.delete<void>('/goals/$id');
+  }
+
+  @override
   Future<Goal> toggleGoal(Goal goal) async {
     final response = await _client.post<Map<String, dynamic>>(
       '/goals/${goal.id}/toggle',

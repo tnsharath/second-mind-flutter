@@ -63,11 +63,15 @@ interrupt) · Daily Briefing · Memory Timeline (search) · Settings.
 ## Backend integration
 
 A FastAPI backend is assumed. Repositories are interface-bound; while
-`USE_MOCK_API=true` (default) they serve realistic dummy data, with
-`TODO(backend)` markers where each real endpoint plugs in:
+`USE_MOCK_API=true` (default) they serve realistic dummy data. Real
+endpoints are already wired in for:
 
-`POST /chat` · `POST /voice` · `GET /context` · `GET /memory` ·
-`GET /briefing` · `GET /goals` · `GET /calendar` · `POST /settings`
+`POST /chat` · `POST /chat/stream` · `GET /context` · `GET /summary` ·
+`GET /weather` · `GET|POST|PATCH|DELETE /memory` · `GET /briefing` ·
+`GET|POST|PATCH|DELETE /goals` · `POST /goals/{id}/toggle` ·
+`GET /calendar` · `GET|POST|PATCH|DELETE /notes` ·
+`GET|POST|PATCH|DELETE /projects` · `POST|GET /focus/sessions` ·
+`GET /journal` · `GET /search`
 
 **No URLs are hardcoded.** Configuration comes from `--dart-define`:
 
@@ -122,6 +126,30 @@ flutter build apk --release --dart-define=API_BASE_URL=https://your.api
 
 ---
 
+## Testing
+
+Unit tests cover the pure second-brain logic and the mock repositories:
+
+```bash
+flutter test
+```
+
+Key test files:
+
+- `test/core/services/memory_capture_service_test.dart` — trigger detection,
+  normalization, categorization, and service capture behavior.
+- `test/features/goals/mock_goals_repository_test.dart` — goal CRUD and toggle
+  on the mock repository.
+- `test/features/memory/mock_memory_repository_test.dart` — memory create,
+  update, and delete on the mock repository.
+- `test/widget_test.dart` — smoke test that the app widget builds.
+
+Because the project relies on `freezed`/`json_serializable`, run
+`dart run build_runner build --delete-conflicting-outputs` before executing
+widget tests or building.
+
+---
+
 ## Design language
 
 Dark-mode-first (`#0D1117` background, `#161B22` cards, `#5B8CFF` primary,
@@ -131,7 +159,7 @@ subtle motion — closer to an operating system than a messenger.
 ## Roadmap notes / known TODOs
 
 - Real auth: exchange the Google `idToken` with the backend for a session token.
-- Streaming chat: upgrade `ApiChatRepository` to SSE or the WebSocket channel.
-- Scheduled morning-briefing notification (needs `timezone` + Android
-  core-library desugaring).
-- Voice turn loop over `POST /voice` + WebSocket for barge-in.
+- Chat-to-memory capture: surface remembered facts in the memory timeline.
+- Habits, daily reflection, and weekly review for productivity guidance.
+- Voice turn loop over a persistent WebSocket for real barge-in.
+- Swap the weather stub for a real provider.

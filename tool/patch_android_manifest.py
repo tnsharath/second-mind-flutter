@@ -8,6 +8,8 @@ PERMISSIONS = [
     'android.permission.INTERNET',
     'android.permission.RECORD_AUDIO',
     'android.permission.POST_NOTIFICATIONS',
+    'android.permission.READ_CALENDAR',
+    'android.permission.SCHEDULE_EXACT_ALARM',
 ]
 
 QUERIES = (

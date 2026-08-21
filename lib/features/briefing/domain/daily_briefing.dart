@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../calendar/domain/calendar_event.dart';
 import '../../goals/domain/goal.dart';
+import '../../habits/domain/habit.dart';
 import '../../home/domain/weather_info.dart';
 
 part 'daily_briefing.freezed.dart';

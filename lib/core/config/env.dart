@@ -27,9 +27,10 @@ class Env {
   );
 
   /// When true, feature repositories serve local mock data instead of
-  /// calling the backend.
+  /// calling the backend. Defaults to true so the app works out of the box
+  /// without a configured backend.
   static const bool useMockApi = bool.fromEnvironment(
     'USE_MOCK_API',
-    defaultValue: false,
+    defaultValue: true,
   );
 }

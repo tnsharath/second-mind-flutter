@@ -8,6 +8,7 @@ class Goal with _$Goal {
   const factory Goal({
     required String id,
     required String title,
+    String? description,
     @Default(false) bool isCompleted,
     DateTime? dueDate,
   }) = _Goal;

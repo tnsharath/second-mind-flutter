@@ -4,7 +4,8 @@ import '../config/env.dart';
 
 /// WebSocket channel for realtime streaming (voice, chat tokens).
 ///
-/// TODO(backend): wire to the FastAPI websocket endpoint once available.
+/// Reserved for future use; chat currently streams via SSE and voice
+/// uses the REST chat repository.
 class WebSocketService {
   WebSocketChannel? _channel;
 

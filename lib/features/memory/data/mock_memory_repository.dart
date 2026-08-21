@@ -1,11 +1,15 @@
+import 'package:uuid/uuid.dart';
+
 import '../domain/memory_item.dart';
 import '../domain/memory_repository.dart';
 
-/// Local dummy memories until the backend /memory endpoint exists.
+/// Local dummy memories for offline/demo use.
 class MockMemoryRepository implements MemoryRepository {
-  @override
-  Future<List<MemoryItem>> getMemories() async {
-    await Future<void>.delayed(const Duration(milliseconds: 350));
+  static List<MemoryItem>? _memories;
+
+  final Uuid _uuid = const Uuid();
+
+  static List<MemoryItem> _seed() {
     final now = DateTime.now();
     return [
       MemoryItem(
@@ -54,5 +58,51 @@ class MockMemoryRepository implements MemoryRepository {
         timestamp: now.subtract(const Duration(days: 2)),
       ),
     ];
+  }
+
+  @override
+  Future<List<MemoryItem>> getMemories() async {
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    _memories ??= _seed();
+    return List.unmodifiable(_memories!);
+  }
+
+  @override
+  Future<MemoryItem> createMemory({
+    required String title,
+    required String description,
+    MemoryCategory category = MemoryCategory.note,
+    bool isImportant = false,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    final memories = _memories ??= _seed();
+    final item = MemoryItem(
+      id: _uuid.v4(),
+      title: title,
+      description: description,
+      category: category,
+      timestamp: DateTime.now(),
+      isImportant: isImportant,
+    );
+    memories.insert(0, item);
+    return item;
+  }
+
+  @override
+  Future<MemoryItem> updateMemory(MemoryItem item) async {
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    final memories = _memories ??= _seed();
+    final index = memories.indexWhere((m) => m.id == item.id);
+    if (index >= 0) {
+      memories[index] = item;
+    }
+    return item;
+  }
+
+  @override
+  Future<void> deleteMemory(String id) async {
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    final memories = _memories ??= _seed();
+    memories.removeWhere((m) => m.id == id);
   }
 }

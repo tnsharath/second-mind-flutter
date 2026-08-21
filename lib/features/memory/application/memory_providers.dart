@@ -13,9 +13,74 @@ final memoryRepositoryProvider = Provider<MemoryRepository>(
       : ApiMemoryRepository(ref.watch(apiClientProvider)),
 );
 
-final memoriesProvider = FutureProvider<List<MemoryItem>>(
-  (ref) => ref.watch(memoryRepositoryProvider).getMemories(),
+final memoriesProvider =
+    AsyncNotifierProvider<MemoriesController, List<MemoryItem>>(
+  MemoriesController.new,
 );
+
+class MemoriesController extends AsyncNotifier<List<MemoryItem>> {
+  MemoryRepository get _repository => ref.read(memoryRepositoryProvider);
+
+  @override
+  Future<List<MemoryItem>> build() => _repository.getMemories();
+
+  Future<MemoryItem> create({
+    required String title,
+    required String description,
+    MemoryCategory category = MemoryCategory.note,
+    bool isImportant = false,
+  }) async {
+    final current = state.valueOrNull ?? const <MemoryItem>[];
+    try {
+      final created = await _repository.createMemory(
+        title: title,
+        description: description,
+        category: category,
+        isImportant: isImportant,
+      );
+      state = AsyncData([created, ...current]);
+      return created;
+    } catch (_) {
+      state = AsyncData(current);
+      rethrow;
+    }
+  }
+
+  /// Optimistic update with rollback on failure.
+  Future<void> update(MemoryItem item) async {
+    final current = state.valueOrNull ?? const <MemoryItem>[];
+    state = AsyncData([
+      for (final m in current)
+        if (m.id == item.id) item else m,
+    ]);
+    try {
+      final updated = await _repository.updateMemory(item);
+      state = AsyncData([
+        for (final m in state.valueOrNull ?? current)
+          if (m.id == updated.id) updated else m,
+      ]);
+    } catch (_) {
+      state = AsyncData(current);
+    }
+  }
+
+  Future<void> togglePin(MemoryItem item) =>
+      update(item.copyWith(isImportant: !item.isImportant));
+
+  /// Optimistic delete with rollback on failure.
+  Future<void> delete(String id) async {
+    final current = state.valueOrNull ?? const <MemoryItem>[];
+    state = AsyncData([
+      for (final m in current)
+        if (m.id != id) m,
+    ]);
+    try {
+      await _repository.deleteMemory(id);
+    } catch (_) {
+      state = AsyncData(current);
+    }
+  }
+}
 
 final memorySearchProvider = StateProvider<String>((ref) => '');
 

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../core/services/reminder_scheduler.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../routes/app_router.dart';
 import '../../auth/application/auth_controller.dart';
@@ -13,11 +14,14 @@ import '../application/home_providers.dart';
 import 'widgets/events_card.dart';
 import 'widgets/goals_card.dart';
 import 'widgets/greeting_header.dart';
+import 'widgets/habits_card.dart';
 import 'widgets/memory_highlights_card.dart';
 import 'widgets/quick_actions.dart';
 import 'widgets/recent_conversations_card.dart';
+import 'widgets/reflection_prompt_card.dart';
 import 'widgets/summary_card.dart';
 import 'widgets/weather_card.dart';
+import 'widgets/weekly_review_card.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -36,6 +40,15 @@ class HomeScreen extends HookConsumerWidget {
         DateTime.now();
     final user = ref.watch(authStateProvider).valueOrNull;
     final isOffline = ref.watch(isOfflineProvider);
+
+    // Reschedule local reminders (events, morning briefing, evening
+    // reflection) after the first frame; best-effort, never throws.
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ReminderScheduler.rescheduleAll(ref);
+      });
+      return null;
+    }, const []);
 
     return Scaffold(
       appBar: AppBar(
@@ -73,6 +86,7 @@ class HomeScreen extends HookConsumerWidget {
           ref.invalidate(todaySummaryProvider);
           ref.invalidate(weatherProvider);
           ref.invalidate(todayGoalsProvider);
+          ref.invalidate(habitsProvider);
           ref.invalidate(upcomingEventsProvider);
           ref.invalidate(memoryHighlightsProvider);
           ref.invalidate(recentConversationsProvider);
@@ -93,9 +107,15 @@ class HomeScreen extends HookConsumerWidget {
             const SizedBox(height: AppSpacing.md),
             const GoalsCard(),
             const SizedBox(height: AppSpacing.md),
+            const HabitsCard(),
+            const SizedBox(height: AppSpacing.md),
             const EventsCard(),
             const SizedBox(height: AppSpacing.md),
             const MemoryHighlightsCard(),
+            const SizedBox(height: AppSpacing.md),
+            const ReflectionPromptCard(),
+            const SizedBox(height: AppSpacing.md),
+            const WeeklyReviewCard(),
             const SizedBox(height: AppSpacing.md),
             const RecentConversationsCard(),
             const SizedBox(height: AppSpacing.lg),

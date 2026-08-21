@@ -12,6 +12,10 @@ class AuraTextField extends StatelessWidget {
     this.suffix,
     this.autofocus = false,
     this.enabled = true,
+    this.minLines,
+    this.maxLines = 1,
+    this.keyboardType,
+    this.textInputAction = TextInputAction.send,
   });
 
   final TextEditingController? controller;
@@ -22,6 +26,10 @@ class AuraTextField extends StatelessWidget {
   final Widget? suffix;
   final bool autofocus;
   final bool enabled;
+  final int? minLines;
+  final int? maxLines;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +39,10 @@ class AuraTextField extends StatelessWidget {
       onSubmitted: onSubmitted,
       autofocus: autofocus,
       enabled: enabled,
-      textInputAction: TextInputAction.send,
+      minLines: minLines,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: prefixIcon == null ? null : Icon(prefixIcon, size: 20),

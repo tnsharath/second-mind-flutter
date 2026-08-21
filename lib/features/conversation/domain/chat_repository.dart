@@ -1,15 +1,12 @@
 import 'conversation.dart';
 
 abstract class ChatRepository {
-  /// Streams assistant reply chunks for [text].
-  ///
-  /// TODO(backend): POST /chat — upgrade to SSE or the WebSocket channel
-  /// once the FastAPI backend is live.
+  /// Streams assistant reply chunks for [text] via POST /chat/stream.
   Stream<String> sendMessage({
     required String conversationId,
     required String text,
   });
 
-  /// TODO(backend): GET /context (recent conversation list)
+  /// GET /context
   Future<List<Conversation>> getRecentConversations();
 }
