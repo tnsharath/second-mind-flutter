@@ -11,7 +11,6 @@ import '../../../core/shared/widgets/aura_text_field.dart';
 import '../../../core/utils/time_format.dart';
 import '../../../routes/app_router.dart';
 import '../application/search_providers.dart';
-import '../domain/search_results.dart';
 
 class SearchScreen extends HookConsumerWidget {
   const SearchScreen({super.key});

@@ -19,7 +19,6 @@ class WeeklyReviewCard extends HookConsumerWidget {
 
     final completedGoals = goals.valueOrNull?.where((g) => g.isCompleted).length ?? 0;
     final totalGoals = goals.valueOrNull?.length ?? 0;
-    final totalHabits = habits.valueOrNull?.length ?? 0;
     final completedHabitInstances = habits.valueOrNull
             ?.fold<int>(0, (sum, h) => sum + h.completedToday) ??
         0;

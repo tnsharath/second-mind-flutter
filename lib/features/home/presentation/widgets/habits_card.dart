@@ -24,13 +24,7 @@ class HabitsCard extends HookConsumerWidget {
         children: [
           SectionHeader(
             title: 'Habits',
-            action: Text(
-              'See all',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            actionLabel: 'See all',
           ),
           const SizedBox(height: 10),
           habits.when(

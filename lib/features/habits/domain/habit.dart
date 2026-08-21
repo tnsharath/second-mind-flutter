@@ -13,7 +13,7 @@ class Habit with _$Habit {
     String? description,
     @Default(HabitFrequency.daily) HabitFrequency frequency,
     @Default(1) int targetCount,
-    int completedToday,
+    @Default(0) int completedToday,
     String? color,
     String? icon,
     @Default(false) bool archived,

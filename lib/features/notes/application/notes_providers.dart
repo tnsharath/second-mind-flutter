@@ -45,7 +45,7 @@ class NotesController extends AsyncNotifier<List<Note>> {
   }
 
   /// Optimistic update with rollback on failure.
-  Future<void> update(Note note) async {
+  Future<void> updateNote(Note note) async {
     final current = state.valueOrNull ?? const <Note>[];
     state = AsyncData([
       for (final n in current)
@@ -64,7 +64,7 @@ class NotesController extends AsyncNotifier<List<Note>> {
   }
 
   Future<void> toggleDone(Note note) =>
-      update(note.copyWith(done: !note.done));
+      updateNote(note.copyWith(done: !note.done));
 
   /// Optimistic delete with rollback on failure.
   Future<void> delete(Note note) async {

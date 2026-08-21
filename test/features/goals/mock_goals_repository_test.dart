@@ -1,5 +1,4 @@
 import 'package:aura/features/goals/data/mock_goals_repository.dart';
-import 'package:aura/features/goals/domain/goal.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

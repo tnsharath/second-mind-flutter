@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -134,7 +132,7 @@ class _JournalBody extends StatelessWidget {
     }
 
     final sorted = [...journal.entries]..sort((a, b) => a.time.compareTo(b.time));
-    final byHour = LinkedHashMap<int, List<JournalEntry>>();
+    final byHour = <int, List<JournalEntry>>{};
     for (final entry in sorted) {
       byHour.putIfAbsent(entry.time.hour, () => []).add(entry);
     }

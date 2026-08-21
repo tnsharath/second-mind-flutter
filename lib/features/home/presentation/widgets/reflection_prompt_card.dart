@@ -51,7 +51,7 @@ class ReflectionPromptCard extends HookConsumerWidget {
           else
             AuraButton(
               label: 'Reflect',
-              variant: AuraButtonVariant.secondary,
+              variant: AuraButtonVariant.tonal,
               onPressed: () => isExpanded.value = true,
             ),
         ],
@@ -70,7 +70,6 @@ class _ReflectionInput extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
     final isSaving = useState(false);
-    final theme = Theme.of(context);
 
     Future<void> save() async {
       final text = controller.text.trim();
@@ -105,7 +104,7 @@ class _ReflectionInput extends HookConsumerWidget {
             Expanded(
               child: AuraButton(
                 label: 'Cancel',
-                variant: AuraButtonVariant.secondary,
+                variant: AuraButtonVariant.ghost,
                 onPressed: onSaved,
               ),
             ),

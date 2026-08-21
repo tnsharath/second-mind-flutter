@@ -23,7 +23,7 @@ class ReminderScheduler {
 
   static const String _idsKey = 'aura_scheduled_reminder_ids';
 
-  static Future<void> rescheduleAll(Ref ref) async {
+  static Future<void> rescheduleAll(WidgetRef ref) async {
     try {
       final settings = ref.read(settingsProvider);
       if (!settings.notificationsEnabled) return;

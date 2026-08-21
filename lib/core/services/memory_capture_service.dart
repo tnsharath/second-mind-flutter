@@ -32,6 +32,7 @@ class MemoryCaptureService {
   /// The returned title/description are simple heuristics; later phases can
   /// call the backend LLM for richer summarization.
   Future<MemoryItem?> capture(String text) async {
+    if (!shouldCapture(text)) return null;
     final normalized = MemoryCaptureLogic.normalize(text);
     if (normalized.isEmpty) return null;
 
@@ -108,7 +109,7 @@ class MemoryCaptureLogic {
     }
 
     // Remove trailing punctuation.
-    if (result.isNotEmpty && ".!?,".contains(result[result.length - 1])) {
+    if (result.isNotEmpty && '.!?,'.contains(result[result.length - 1])) {
       result = result.substring(0, result.length - 1);
     }
 

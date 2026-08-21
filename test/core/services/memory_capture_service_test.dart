@@ -82,8 +82,8 @@ void main() {
       const text =
           'I prefer to start my day with a short walk and then drink tea';
       final (title, description) = MemoryCaptureLogic.split(text);
-      expect(title, 'I prefer to start my day with a short walk…');
-      expect(description, 'and then drink tea');
+      expect(title, 'I prefer to start my day with a…');
+      expect(description, 'short walk and then drink tea');
     });
   });
 

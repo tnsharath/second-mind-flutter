@@ -91,6 +91,8 @@ class NotificationService {
         tz.TZDateTime.from(at, tz.local),
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (_) {
       // Ignore — scheduling is best-effort (e.g. exact alarms not allowed).

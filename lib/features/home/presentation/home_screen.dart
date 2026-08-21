@@ -10,6 +10,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../calendar/application/calendar_providers.dart';
 import '../../conversation/application/conversations_providers.dart';
 import '../../goals/application/goals_providers.dart';
+import '../../habits/application/habits_providers.dart';
 import '../application/home_providers.dart';
 import 'widgets/events_card.dart';
 import 'widgets/goals_card.dart';

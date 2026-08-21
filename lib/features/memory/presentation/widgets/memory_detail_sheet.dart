@@ -162,7 +162,7 @@ class _EditForm extends HookConsumerWidget {
     Future<void> save() async {
       final trimmedTitle = title.text.trim();
       if (trimmedTitle.isEmpty) return;
-      await ref.read(memoriesProvider.notifier).update(
+      await ref.read(memoriesProvider.notifier).updateMemory(
             memory.copyWith(
               title: trimmedTitle,
               description: description.text.trim(),
@@ -256,6 +256,7 @@ Color _categoryColor(MemoryCategory category) {
     MemoryCategory.preference => const Color(0xFF6EE7F9),
     MemoryCategory.note => const Color(0xFFFBBF24),
     MemoryCategory.milestone => const Color(0xFFF472B6),
+    MemoryCategory.reflection => const Color(0xFFA78BFA),
   };
 }
 
@@ -266,5 +267,6 @@ IconData _categoryIcon(MemoryCategory category) {
     MemoryCategory.preference => Icons.tune_rounded,
     MemoryCategory.note => Icons.notes_rounded,
     MemoryCategory.milestone => Icons.emoji_events_outlined,
+    MemoryCategory.reflection => Icons.auto_awesome_outlined,
   };
 }

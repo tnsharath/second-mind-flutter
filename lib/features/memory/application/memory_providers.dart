@@ -47,7 +47,7 @@ class MemoriesController extends AsyncNotifier<List<MemoryItem>> {
   }
 
   /// Optimistic update with rollback on failure.
-  Future<void> update(MemoryItem item) async {
+  Future<void> updateMemory(MemoryItem item) async {
     final current = state.valueOrNull ?? const <MemoryItem>[];
     state = AsyncData([
       for (final m in current)
@@ -65,7 +65,7 @@ class MemoriesController extends AsyncNotifier<List<MemoryItem>> {
   }
 
   Future<void> togglePin(MemoryItem item) =>
-      update(item.copyWith(isImportant: !item.isImportant));
+      updateMemory(item.copyWith(isImportant: !item.isImportant));
 
   /// Optimistic delete with rollback on failure.
   Future<void> delete(String id) async {

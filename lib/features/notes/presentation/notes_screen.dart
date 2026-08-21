@@ -112,7 +112,7 @@ class _NoteCard extends ConsumerWidget {
     );
     if (time == null) return;
     final at = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    ref.read(notesProvider.notifier).update(note.copyWith(remindAt: at));
+    ref.read(notesProvider.notifier).updateNote(note.copyWith(remindAt: at));
   }
 
   @override
@@ -199,7 +199,7 @@ class _NoteCard extends ConsumerWidget {
                           const SizedBox(width: 4),
                           GestureDetector(
                             onTap: () => controller
-                                .update(note.copyWith(remindAt: null)),
+                                .updateNote(note.copyWith(remindAt: null)),
                             child: Icon(Icons.close_rounded,
                                 size: 14, color: theme.colorScheme.outline),
                           ),
