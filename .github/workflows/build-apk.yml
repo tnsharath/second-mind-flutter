@@ -31,8 +31,10 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.29.0' # Use your project's target version
           channel: stable
           cache: true
+
 
       - name: Generate Android platform scaffolding
         run: flutter create --platforms android --project-name aura --org com.aura .
