@@ -8,15 +8,16 @@ BUILD_GRADLE_KTS = Path('android/app/build.gradle.kts')
 
 
 def patch_groovy(text: str) -> str:
+    text = text.replace('\r\n', '\n')
     if 'coreLibraryDesugaringEnabled' not in text:
-        text = text.replace(
-            '    compileOptions {\n',
-            '    compileOptions {\n        coreLibraryDesugaringEnabled true\n',
-            1,
+        text = re.sub(
+            r'(\s*compileOptions\s*\{)',
+            r'\1\n        coreLibraryDesugaringEnabled true',
+            text,
+            count=1,
         )
     if 'coreLibraryDesugaring' not in text:
         dep = "    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'\n"
-        # Empty block on one line: dependencies {}
         text = re.sub(
             r'^(\s*)dependencies\s*\{\s*\}\s*$',
             r'\1dependencies {\n' + dep + r'\1}\n',
@@ -24,7 +25,6 @@ def patch_groovy(text: str) -> str:
             count=1,
             flags=re.MULTILINE,
         )
-        # Non-empty or multi-line block: append after the opening brace
         if 'coreLibraryDesugaring' not in text:
             text = re.sub(
                 r'^(\s*)dependencies\s*\{\s*$',
@@ -33,22 +33,22 @@ def patch_groovy(text: str) -> str:
                 count=1,
                 flags=re.MULTILINE,
             )
-        # No dependencies block at all: append one at the end
         if 'coreLibraryDesugaring' not in text:
             text = text.rstrip() + '\n\ndependencies {\n' + dep + '}\n'
     return text
 
 
 def patch_kotlin(text: str) -> str:
+    text = text.replace('\r\n', '\n')
     if 'isCoreLibraryDesugaringEnabled' not in text:
-        text = text.replace(
-            '    compileOptions {\n',
-            '    compileOptions {\n        isCoreLibraryDesugaringEnabled = true\n',
-            1,
+        text = re.sub(
+            r'(\s*compileOptions\s*\{)',
+            r'\1\n        isCoreLibraryDesugaringEnabled = true',
+            text,
+            count=1,
         )
     if 'coreLibraryDesugaring' not in text:
         dep = '    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n'
-        # Empty block on one line: dependencies {}
         text = re.sub(
             r'^(\s*)dependencies\s*\{\s*\}\s*$',
             r'\1dependencies {\n' + dep + r'\1}\n',
@@ -56,7 +56,6 @@ def patch_kotlin(text: str) -> str:
             count=1,
             flags=re.MULTILINE,
         )
-        # Non-empty or multi-line block: append after the opening brace
         if 'coreLibraryDesugaring' not in text:
             text = re.sub(
                 r'^(\s*)dependencies\s*\{\s*$',
@@ -65,7 +64,6 @@ def patch_kotlin(text: str) -> str:
                 count=1,
                 flags=re.MULTILINE,
             )
-        # No dependencies block at all: append one at the end
         if 'coreLibraryDesugaring' not in text:
             text = text.rstrip() + '\n\ndependencies {\n' + dep + '}\n'
     return text

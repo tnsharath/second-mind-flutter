@@ -31,6 +31,6 @@ class Env {
   /// without a configured backend.
   static const bool useMockApi = bool.fromEnvironment(
     'USE_MOCK_API',
-    defaultValue: true,
+    defaultValue: false,
   );
 }

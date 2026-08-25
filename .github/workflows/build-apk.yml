@@ -31,10 +31,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0' # Use your project's target version
           channel: stable
           cache: true
-
 
       - name: Generate Android platform scaffolding
         run: flutter create --platforms android --project-name aura --org com.aura .
@@ -46,7 +44,7 @@ jobs:
         run: python3 tool/patch_android_build_gradle.py
 
       - name: Install dependencies
-        run: flutter pub upgrade
+        run: flutter pub get
 
       - name: Generate code (freezed / json_serializable)
         run: dart run build_runner build --delete-conflicting-outputs
@@ -57,8 +55,8 @@ jobs:
       - name: Build release APK (split per ABI)
         run: |
           flutter build apk --release --split-per-abi \
-            --dart-define=API_BASE_URL=${{ github.event.inputs.api_base_url || 'https://second-mind-backend.vercel.app' }} \
-            --dart-define=USE_MOCK_API=${{ github.event.inputs.use_mock_api || 'false' }}
+            --dart-define=API_BASE_URL=${{ inputs.api_base_url || github.event.inputs.api_base_url || 'https://second-mind-backend.vercel.app' }} \
+            --dart-define=USE_MOCK_API=${{ inputs.use_mock_api || github.event.inputs.use_mock_api || 'false' }}
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
