@@ -9,6 +9,12 @@ BUILD_GRADLE_KTS = Path('android/app/build.gradle.kts')
 
 def patch_groovy(text: str) -> str:
     text = text.replace('\r\n', '\n')
+    text = re.sub(r'compileSdkVersion\s+[\w\.]+', 'compileSdkVersion 36', text)
+    text = re.sub(r'compileSdk\s+[\w\.]+', 'compileSdk 36', text)
+    text = re.sub(r'ndkVersion\s+"[^"]*"', 'ndkVersion "27.0.12077973"', text)
+    text = re.sub(r'minSdkVersion\s+[\w\.]+', 'minSdkVersion 24', text)
+    text = re.sub(r'minSdk\s+[\w\.]+', 'minSdk 24', text)
+
     if 'coreLibraryDesugaringEnabled' not in text:
         text = re.sub(
             r'(\s*compileOptions\s*\{)',
@@ -40,6 +46,17 @@ def patch_groovy(text: str) -> str:
 
 def patch_kotlin(text: str) -> str:
     text = text.replace('\r\n', '\n')
+    text = re.sub(r'compileSdk\s*=\s*[\w\.]+', 'compileSdk = 36', text)
+    text = re.sub(r'ndkVersion\s*=\s*"[^"]*"', 'ndkVersion = "27.0.12077973"', text)
+    text = re.sub(r'minSdk\s*=\s*[\w\.]+', 'minSdk = 24', text)
+
+    if 'compileSdk' not in text:
+        text = re.sub(r'(\s*android\s*\{)', r'\1\n    compileSdk = 36', text, count=1)
+    if 'ndkVersion' not in text:
+        text = re.sub(r'(\s*android\s*\{)', r'\1\n    ndkVersion = "27.0.12077973"', text, count=1)
+    if 'minSdk' not in text:
+        text = re.sub(r'(\s*defaultConfig\s*\{)', r'\1\n        minSdk = 24', text, count=1)
+
     if 'isCoreLibraryDesugaringEnabled' not in text:
         text = re.sub(
             r'(\s*compileOptions\s*\{)',
