@@ -3,7 +3,13 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/providers.dart';
+import '../../calendar/application/calendar_providers.dart';
 import '../../conversation/application/chat_controller.dart';
+import '../../conversation/domain/captured_item.dart';
+import '../../goals/application/goals_providers.dart';
+import '../../journal/application/journal_providers.dart';
+import '../../memory/application/memory_providers.dart';
+import '../../notes/application/notes_providers.dart';
 import '../domain/voice_session_state.dart';
 
 final voiceControllerProvider =
@@ -59,31 +65,93 @@ class VoiceController extends Notifier<VoiceSessionState> {
   }
 
   Future<void> _respond(String text) async {
+
     final speech = ref.read(speechServiceProvider);
     await speech.stopListening();
     state = state.copyWith(phase: VoicePhase.thinking, transcript: text);
 
     final buffer = StringBuffer();
     try {
-      await for (final chunk in ref.read(chatRepositoryProvider).sendMessage(
+      await for (final chunk in ref.read(chatRepositoryProvider).streamMessage(
         conversationId: 'voice',
         text: text,
       )) {
-        buffer.write(chunk);
+        if (chunk.delta.isNotEmpty) {
+          buffer.write(chunk.delta);
+        }
+        if (chunk.capturedItems != null && chunk.capturedItems!.isNotEmpty) {
+          _invalidateSectionProviders(chunk.capturedItems!);
+        }
       }
     } catch (_) {
       buffer.write('Something went wrong while reaching AURA. Please try again.');
     }
     if (state.phase != VoicePhase.thinking) return;
 
+    final isExit = _isExitIntent(text);
     final reply = buffer.toString().trim();
     state = state.copyWith(phase: VoicePhase.speaking, response: reply);
     await speech.speak(reply);
-    _timer = Timer(const Duration(seconds: 6), () {
-      if (state.phase == VoicePhase.speaking) {
-        state = state.copyWith(phase: VoicePhase.idle);
+    if (state.phase == VoicePhase.speaking) {
+      if (isExit) {
+        await interrupt();
+      } else {
+        await start();
       }
-    });
+    }
+  }
+
+  void _invalidateSectionProviders(List<CapturedItem> items) {
+    for (final item in items) {
+      switch (item.category) {
+        case 'gratitude':
+        case 'journal':
+          ref.invalidate(journalProvider);
+          ref.invalidate(notesProvider);
+          break;
+        case 'todo':
+        case 'reminder':
+          ref.invalidate(notesProvider);
+          break;
+        case 'schedule':
+          ref.invalidate(upcomingEventsProvider);
+          break;
+        case 'goal':
+          ref.invalidate(todayGoalsProvider);
+          break;
+
+        case 'memory':
+          ref.invalidate(memoriesProvider);
+          break;
+      }
+    }
+  }
+
+
+  static bool _isExitIntent(String text) {
+    final lower = text.trim().toLowerCase();
+    final exitPhrases = [
+      'bye',
+      'goodbye',
+      'good bye',
+      'bye bye',
+      'exit',
+      'quit',
+      'see ya',
+      'stop listening',
+      'close',
+      'catch you later',
+      'talk to you later',
+    ];
+    for (final phrase in exitPhrases) {
+      if (lower == phrase ||
+          lower.startsWith('$phrase ') ||
+          lower.endsWith(' $phrase') ||
+          lower.contains(' $phrase ')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> interrupt() async {

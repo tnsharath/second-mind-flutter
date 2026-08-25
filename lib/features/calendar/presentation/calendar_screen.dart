@@ -32,6 +32,7 @@ class CalendarScreen extends HookConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'calendar_fab',
         onPressed: () => _showEventFormSheet(context, ref),
         icon: const Icon(Icons.add_rounded),
         label: const Text('New event'),

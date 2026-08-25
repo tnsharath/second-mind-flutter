@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_colors.dart';
+import '../features/home/application/home_providers.dart';
 import 'app_router.dart';
 
 /// Bottom-navigation scaffold for the main tabs.
@@ -9,7 +11,7 @@ import 'app_router.dart';
 /// Tab state is preserved by [StatefulShellRoute.indexedStack]; the centered
 /// mic button (AuraLogo gradient style) pushes voice mode on top of the
 /// current tab.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -23,15 +25,17 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isHome = navigationShell.currentIndex == 0;
+    final isScrolled = ref.watch(isHomeScrolledProvider);
+    final showFab = isHome && isScrolled;
 
     return Scaffold(
       body: navigationShell,
       floatingActionButton: AnimatedScale(
-        scale: isHome ? 1.0 : 0.0,
+        scale: showFab ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 200),
-        child: isHome
+        child: showFab
             ? _VoiceFab(onTap: () => context.push(AppRoutes.voice))
             : const SizedBox.shrink(),
       ),

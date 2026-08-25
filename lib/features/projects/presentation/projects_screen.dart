@@ -24,6 +24,7 @@ class ProjectsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Projects')),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'projects_fab',
         onPressed: () => _showNewProjectSheet(context, ref),
         child: const Icon(Icons.add_rounded),
       ),

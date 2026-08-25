@@ -25,6 +25,7 @@ class GoalsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Goals')),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'goals_fab',
         onPressed: () => _showGoalFormSheet(context, ref),
         child: const Icon(Icons.add_rounded),
       ),
@@ -195,10 +196,11 @@ class _DueDatePicker extends StatelessWidget {
     return InkWell(
       onTap: () async {
         final now = DateTime.now();
+        final firstAllowed = dueDate != null && dueDate!.isBefore(now) ? dueDate! : now;
         final picked = await showDatePicker(
           context: context,
           initialDate: dueDate ?? now,
-          firstDate: now,
+          firstDate: firstAllowed,
           lastDate: now.add(const Duration(days: 365 * 2)),
         );
         onChanged(picked);

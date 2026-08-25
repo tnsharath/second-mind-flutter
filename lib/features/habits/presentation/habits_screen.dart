@@ -23,6 +23,7 @@ class HabitsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Habits')),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'habits_fab',
         onPressed: () => _showHabitFormSheet(context, ref),
         child: const Icon(Icons.add_rounded),
       ),

@@ -84,7 +84,17 @@ class HomeScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.axis == Axis.vertical) {
+            final isScrolled = notification.metrics.pixels > 30;
+            if (ref.read(isHomeScrolledProvider) != isScrolled) {
+              ref.read(isHomeScrolledProvider.notifier).state = isScrolled;
+            }
+          }
+          return false;
+        },
+        child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(todaySummaryProvider);
           ref.invalidate(weatherProvider);
@@ -129,7 +139,8 @@ class HomeScreen extends HookConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 

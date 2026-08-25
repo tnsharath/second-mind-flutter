@@ -43,6 +43,7 @@ dependencies:
   connectivity_plus: ^6.1.1
   device_calendar: ^4.3.2
   timezone: ^0.9.4
+  wakelock_plus: ^1.2.8
 
   # Utils
   intl: any # pinned by flutter_localizations; keep unconstrained
@@ -62,11 +63,10 @@ dev_dependencies:
 # the platform scaffolding (done automatically in CI).
 flutter_launcher_icons:
   android: true
-  ios: true
+  ios: false
   image_path: assets/icon/app_icon.png
   adaptive_icon_background: "#0D1117"
   adaptive_icon_foreground: assets/icon/adaptive_fg.png
-  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true

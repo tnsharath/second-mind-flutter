@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../domain/captured_item.dart';
 import '../../domain/chat_message.dart';
 import 'typing_indicator.dart';
 
@@ -29,51 +31,100 @@ class MessageBubble extends StatelessWidget {
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.82,
-        ),
-        decoration: BoxDecoration(
-          color: bubbleColor,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(AppSpacing.radiusLg),
-            topRight: const Radius.circular(AppSpacing.radiusLg),
-            bottomLeft: Radius.circular(isUser ? AppSpacing.radiusLg : 6),
-            bottomRight: Radius.circular(isUser ? 6 : AppSpacing.radiusLg),
-          ),
-          border: isUser
-              ? null
-              : Border.all(color: scheme.outline.withValues(alpha: 0.6)),
-        ),
-        child: isThinking
-            ? const TypingIndicator()
-            : isUser
-                ? SelectableText(
-                    message.content,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: textColor),
-                  )
-                : MarkdownBody(
-                    data: message.content,
-                    selectable: true,
-                    styleSheet:
-                        MarkdownStyleSheet.fromTheme(theme).copyWith(
-                      p: theme.textTheme.bodyMedium
-                          ?.copyWith(color: textColor, height: 1.45),
-                      code: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: 'monospace',
-                        color: AppColors.accent,
+      child: Column(
+        crossAxisAlignment:
+            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.82,
+            ),
+            decoration: BoxDecoration(
+              color: bubbleColor,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(AppSpacing.radiusLg),
+                topRight: const Radius.circular(AppSpacing.radiusLg),
+                bottomLeft: Radius.circular(isUser ? AppSpacing.radiusLg : 6),
+                bottomRight: Radius.circular(isUser ? 6 : AppSpacing.radiusLg),
+              ),
+              border: isUser
+                  ? null
+                  : Border.all(color: scheme.outline.withValues(alpha: 0.6)),
+            ),
+            child: isThinking
+                ? const TypingIndicator()
+                : isUser
+                    ? SelectableText(
+                        message.content,
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(color: textColor),
+                      )
+                    : MarkdownBody(
+                        data: message.content,
+                        selectable: true,
+                        styleSheet:
+                            MarkdownStyleSheet.fromTheme(theme).copyWith(
+                          p: theme.textTheme.bodyMedium
+                              ?.copyWith(color: textColor, height: 1.45),
+                          code: theme.textTheme.bodySmall?.copyWith(
+                            fontFamily: 'monospace',
+                            color: AppColors.accent,
+                          ),
+                          codeblockDecoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest,
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusSm),
+                          ),
+                        ),
                       ),
-                      codeblockDecoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusSm),
+          ),
+          if (message.capturedItems.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2, bottom: 6),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: message.capturedItems.map((item) {
+                  return InkWell(
+                    onTap: () => context.push(item.targetRoute),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: scheme.primary.withValues(alpha: 0.4)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            item.displayBadge,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 10,
+                            color: scheme.onPrimaryContainer,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
       ),
     );
   }
 }
+

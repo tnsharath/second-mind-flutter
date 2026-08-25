@@ -16,7 +16,10 @@ class SpeechService {
 
   Future<bool> initSpeech() async {
     try {
-      _sttAvailable = await _stt.initialize(onError: (_) {}, onStatus: (_) {});
+      _sttAvailable = await _stt.initialize(
+        onError: (_) {},
+        onStatus: (_) {},
+      );
     } catch (_) {
       _sttAvailable = false;
     }
@@ -26,11 +29,19 @@ class SpeechService {
   Future<void> startListening({
     required void Function(String words, bool isFinal) onResult,
   }) async {
+    if (!_sttAvailable) {
+      _sttAvailable = await initSpeech();
+    }
     if (!_sttAvailable) return;
     try {
       await _stt.listen(
         onResult: (result) => onResult(result.recognizedWords, result.finalResult),
-        listenOptions: SpeechListenOptions(partialResults: true),
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 4),
+        listenOptions: SpeechListenOptions(
+          partialResults: true,
+          cancelOnError: false,
+        ),
       );
     } catch (_) {
       // Ignore — caller falls back to simulated input.
@@ -49,6 +60,7 @@ class SpeechService {
         await _tts.setLanguage('en-US');
         await _tts.setSpeechRate(0.5);
         await _tts.setPitch(1.0);
+        await _tts.awaitSpeakCompletion(true);
         _ttsReady = true;
       }
       await _tts.speak(text);

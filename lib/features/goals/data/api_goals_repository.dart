@@ -65,6 +65,9 @@ class ApiGoalsRepository implements GoalsRepository {
 
 /// Backend ids are integers; the Dart models use String ids.
 Map<String, dynamic> _normalizeId(Map<String, dynamic> json) => {
+      'isCompleted': false,
+      'progress': 0,
       ...json,
-      'id': json['id'].toString(),
+      'id': (json['id'] ?? json['_id'] ?? DateTime.now().millisecondsSinceEpoch).toString(),
+      'title': json['title']?.toString() ?? 'Goal',
     };

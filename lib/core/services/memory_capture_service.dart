@@ -69,6 +69,19 @@ class MemoryCaptureLogic {
     "don't let me forget",
     'keep in mind',
     'make sure to remember',
+    'grateful for',
+    'thankful for',
+    'blessed for',
+    'today i felt',
+    'reflected on',
+    'my goal is',
+    'want to achieve',
+    'remind me to',
+    'need to buy',
+    'meeting with',
+    'appointment at',
+    'i prefer',
+    'my favorite',
   ];
 
   static const List<String> _stopWords = [
@@ -84,6 +97,7 @@ class MemoryCaptureLogic {
     final lower = text.toLowerCase();
     return _triggers.any((t) => lower.contains(t));
   }
+
 
   /// Strips trigger phrases and polite wrappers from [text].
   static String normalize(String text) {

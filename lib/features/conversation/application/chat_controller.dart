@@ -6,8 +6,14 @@ import 'package:uuid/uuid.dart';
 import '../../../core/config/env.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/services/memory_capture_service.dart';
+import '../../calendar/application/calendar_providers.dart';
+import '../../goals/application/goals_providers.dart';
+import '../../journal/application/journal_providers.dart';
+import '../../memory/application/memory_providers.dart';
+import '../../notes/application/notes_providers.dart';
 import '../data/mock_chat_repository.dart';
 import '../data/sse_chat_repository.dart';
+import '../domain/captured_item.dart';
 import '../domain/chat_message.dart';
 import '../domain/chat_repository.dart';
 
@@ -76,19 +82,39 @@ class ChatController extends Notifier<ChatState> {
     );
 
     final buffer = StringBuffer();
+    final capturedList = <CapturedItem>[];
+
     try {
-      await for (final chunk in ref.read(chatRepositoryProvider).sendMessage(
+      await for (final chunk in ref.read(chatRepositoryProvider).streamMessage(
         conversationId: _conversationId,
         text: text,
       )) {
-        buffer.write(chunk);
-        _updateAssistant(
-          assistantMessage.id,
-          buffer.toString(),
-          MessageStatus.streaming,
-        );
+        if (chunk.delta.isNotEmpty) {
+          buffer.write(chunk.delta);
+          _updateAssistant(
+            assistantMessage.id,
+            buffer.toString(),
+            MessageStatus.streaming,
+            capturedItems: capturedList,
+          );
+        }
+        if (chunk.capturedItems != null && chunk.capturedItems!.isNotEmpty) {
+          capturedList.addAll(chunk.capturedItems!);
+          _invalidateSectionProviders(chunk.capturedItems!);
+          _updateAssistant(
+            assistantMessage.id,
+            buffer.toString(),
+            MessageStatus.streaming,
+            capturedItems: capturedList,
+          );
+        }
       }
-      _updateAssistant(assistantMessage.id, buffer.toString(), MessageStatus.sent);
+      _updateAssistant(
+        assistantMessage.id,
+        buffer.toString(),
+        MessageStatus.sent,
+        capturedItems: capturedList,
+      );
     } catch (_) {
       final msg = buffer.isNotEmpty
           ? '${buffer.toString()}\n[Stream disconnected]'
@@ -97,12 +123,12 @@ class ChatController extends Notifier<ChatState> {
         assistantMessage.id,
         msg,
         MessageStatus.error,
+        capturedItems: capturedList,
       );
     } finally {
       state = state.copyWith(isResponding: false);
       unawaited(_maybeCaptureMemory(text));
     }
-
   }
 
   Future<void> _maybeCaptureMemory(String text) async {
@@ -112,17 +138,53 @@ class ChatController extends Notifier<ChatState> {
     }
   }
 
-  void _updateAssistant(String id, String content, MessageStatus status) {
+  void _invalidateSectionProviders(List<CapturedItem> items) {
+    for (final item in items) {
+      switch (item.category) {
+        case 'gratitude':
+        case 'journal':
+          ref.invalidate(journalProvider);
+          ref.invalidate(notesProvider);
+          break;
+        case 'todo':
+        case 'reminder':
+          ref.invalidate(notesProvider);
+          break;
+        case 'schedule':
+          ref.invalidate(upcomingEventsProvider);
+          break;
+        case 'goal':
+          ref.invalidate(todayGoalsProvider);
+          break;
+
+        case 'memory':
+          ref.invalidate(memoriesProvider);
+          break;
+      }
+    }
+  }
+
+  void _updateAssistant(
+    String id,
+    String content,
+    MessageStatus status, {
+    List<CapturedItem>? capturedItems,
+  }) {
     state = state.copyWith(
       messages: [
         for (final message in state.messages)
           if (message.id == id)
-            message.copyWith(content: content, status: status)
+            message.copyWith(
+              content: content,
+              status: status,
+              capturedItems: capturedItems ?? message.capturedItems,
+            )
           else
             message,
       ],
     );
   }
+
 
   void clear() {
     state = const ChatState();

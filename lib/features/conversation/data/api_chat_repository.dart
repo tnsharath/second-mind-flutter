@@ -25,6 +25,17 @@ class ApiChatRepository implements ChatRepository {
   }
 
   @override
+  Stream<ChatStreamChunk> streamMessage({
+    required String conversationId,
+    required String text,
+  }) async* {
+    await for (final reply in sendMessage(conversationId: conversationId, text: text)) {
+      yield ChatStreamChunk(delta: reply);
+    }
+  }
+
+
+  @override
   Future<List<Conversation>> getRecentConversations() async {
     final response = await _client.get<List<dynamic>>('/context');
     final data = response.data ?? const [];

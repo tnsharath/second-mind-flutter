@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../core/shared/widgets/aura_button.dart';
 import '../application/voice_controller.dart';
@@ -16,6 +18,26 @@ class VoiceModeScreen extends HookConsumerWidget {
     final session = ref.watch(voiceControllerProvider);
     final controller = ref.read(voiceControllerProvider.notifier);
     final theme = Theme.of(context);
+
+    useEffect(() {
+      WakelockPlus.enable();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (ref.read(voiceControllerProvider).phase == VoicePhase.idle) {
+          ref.read(voiceControllerProvider.notifier).start();
+        }
+      });
+      return () {
+        WakelockPlus.disable();
+      };
+    }, const []);
+
+    ref.listen<VoiceSessionState>(voiceControllerProvider, (previous, next) {
+      if (previous?.phase == VoicePhase.speaking && next.phase == VoicePhase.idle) {
+        if (context.mounted) {
+          context.pop();
+        }
+      }
+    });
 
     final statusLabel = switch (session.phase) {
       VoicePhase.idle => 'Tap the orb to talk',

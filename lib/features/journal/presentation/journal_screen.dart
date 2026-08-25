@@ -32,6 +32,7 @@ class JournalScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Journal')),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'journal_fab',
         onPressed: () => _showNewJournalSheet(context, ref, selectedDate.value),
         icon: const Icon(Icons.edit_note_rounded),
         label: const Text('Journal entry'),
@@ -288,7 +289,7 @@ class _EntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final (icon, color) = _styles[entry.kind]!;
+    final (icon, color) = _styles[entry.kind] ?? (Icons.notes_rounded, theme.colorScheme.primary);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: AuraCard(

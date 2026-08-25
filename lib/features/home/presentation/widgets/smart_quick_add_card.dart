@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../core/providers/providers.dart';
@@ -7,6 +8,7 @@ import '../../../../core/services/reminder_scheduler.dart';
 import '../../../../core/shared/widgets/aura_button.dart';
 import '../../../../core/shared/widgets/aura_card.dart';
 import '../../../../core/shared/widgets/aura_text_field.dart';
+import '../../../../routes/app_router.dart';
 import '../../../calendar/application/calendar_providers.dart';
 import '../../../goals/application/goals_providers.dart';
 import '../../../memory/application/memory_providers.dart';
@@ -22,6 +24,7 @@ class SmartQuickAddCard extends HookConsumerWidget {
     final controller = useTextEditingController();
     final isSubmitting = useState(false);
     final statusMessage = useState<({String text, Color color})?>(null);
+    final hasText = useListenable(controller).text.trim().isNotEmpty;
 
     Future<void> submit() async {
       final text = controller.text.trim();
@@ -117,10 +120,21 @@ class SmartQuickAddCard extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              AuraButton(
-                label: isSubmitting.value ? '...' : 'Add',
-                onPressed: isSubmitting.value ? null : submit,
-              ),
+              if (hasText)
+                AuraButton(
+                  label: isSubmitting.value ? '...' : 'Add',
+                  icon: Icons.send_rounded,
+                  onPressed: isSubmitting.value ? null : submit,
+                  expand: false,
+                )
+              else
+                AuraButton(
+                  label: 'Voice',
+                  icon: Icons.mic_rounded,
+                  variant: AuraButtonVariant.primary,
+                  onPressed: () => context.push(AppRoutes.voice),
+                  expand: false,
+                ),
             ],
           ),
           if (statusMessage.value != null) ...[

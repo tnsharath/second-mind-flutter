@@ -61,9 +61,12 @@ class DeviceCalendarRepository implements CalendarRepository {
 
   Future<List<CalendarEvent>> _loadDeviceEvents() async {
     try {
-      final permissions = await _plugin.requestPermissions();
-      if (!permissions.isSuccess || permissions.data != true) {
-        return const [];
+      final hasPermissionResult = await _plugin.hasPermissions();
+      if (!hasPermissionResult.isSuccess || hasPermissionResult.data != true) {
+        final permissions = await _plugin.requestPermissions();
+        if (!permissions.isSuccess || permissions.data != true) {
+          return const [];
+        }
       }
       final calendars = await _plugin.retrieveCalendars();
       if (!calendars.isSuccess) return const [];

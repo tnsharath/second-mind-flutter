@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'captured_item.dart';
+
 part 'chat_message.freezed.dart';
 part 'chat_message.g.dart';
 
@@ -15,7 +17,9 @@ class ChatMessage with _$ChatMessage {
     required String content,
     required DateTime createdAt,
     @Default(MessageStatus.sent) MessageStatus status,
+    @Default([]) List<CapturedItem> capturedItems,
   }) = _ChatMessage;
+
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) =>
       _$ChatMessageFromJson(json);

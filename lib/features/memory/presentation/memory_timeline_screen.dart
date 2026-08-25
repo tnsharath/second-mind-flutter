@@ -26,6 +26,7 @@ class MemoryTimelineScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Memory timeline')),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'memory_fab',
         onPressed: () => _showAddMemorySheet(context, ref),
         icon: const Icon(Icons.add_rounded),
         label: const Text('Add memory'),

@@ -37,3 +37,7 @@ final isOfflineProvider = Provider<bool>((ref) {
   if (results == null) return false;
   return results.isEmpty || results.contains(ConnectivityResult.none);
 });
+
+/// True when the user has scrolled past top on the Home screen.
+final isHomeScrolledProvider = StateProvider<bool>((ref) => false);
+

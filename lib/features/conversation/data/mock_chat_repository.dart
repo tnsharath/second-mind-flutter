@@ -1,3 +1,4 @@
+import '../domain/captured_item.dart';
 import '../domain/chat_repository.dart';
 import '../domain/conversation.dart';
 
@@ -20,14 +21,81 @@ class MockChatRepository implements ChatRepository {
     required String conversationId,
     required String text,
   }) async* {
+    await for (final chunk in streamMessage(conversationId: conversationId, text: text)) {
+      if (chunk.delta.isNotEmpty) yield chunk.delta;
+    }
+  }
+
+  @override
+  Stream<ChatStreamChunk> streamMessage({
+    required String conversationId,
+    required String text,
+  }) async* {
     await Future<void>.delayed(const Duration(milliseconds: 700));
     final reply = _replies[text.hashCode.abs() % _replies.length];
     final words = reply.split(' ');
     for (final word in words) {
       await Future<void>.delayed(const Duration(milliseconds: 45));
-      yield '$word ';
+      yield ChatStreamChunk(delta: '$word ');
+    }
+
+    final captured = _extractMockCaptured(text);
+    if (captured.isNotEmpty) {
+      yield ChatStreamChunk(capturedItems: captured);
     }
   }
+
+  List<CapturedItem> _extractMockCaptured(String text) {
+    final lower = text.toLowerCase();
+    final items = <CapturedItem>[];
+    final title = text.length <= 40 ? text : '${text.substring(0, 39)}…';
+
+    if (lower.contains('grateful') || lower.contains('thankful') || lower.contains('blessed')) {
+      items.add(CapturedItem(
+        category: 'gratitude',
+        title: title,
+        detail: text,
+        entityType: 'note',
+      ));
+    } else if (lower.contains('feel') || lower.contains('today i') || lower.contains('reflected')) {
+      items.add(CapturedItem(
+        category: 'journal',
+        title: title,
+        detail: text,
+        entityType: 'note',
+      ));
+    } else if (lower.contains('goal') || lower.contains('want to achieve') || lower.contains('target')) {
+      items.add(CapturedItem(
+        category: 'goal',
+        title: title,
+        detail: text,
+        entityType: 'goal',
+      ));
+    } else if (lower.contains('remind') || lower.contains('meeting') || lower.contains('appointment') || lower.contains('call at')) {
+      items.add(CapturedItem(
+        category: 'schedule',
+        title: title,
+        detail: text,
+        entityType: 'event',
+      ));
+    } else if (lower.contains('need to') || lower.contains('todo') || lower.contains('buy')) {
+      items.add(CapturedItem(
+        category: 'todo',
+        title: title,
+        detail: text,
+        entityType: 'note',
+      ));
+    } else if (lower.contains('prefer') || lower.contains('favorite') || lower.contains('remember')) {
+      items.add(CapturedItem(
+        category: 'memory',
+        title: title,
+        detail: text,
+        entityType: 'memory',
+      ));
+    }
+    return items;
+  }
+
 
   @override
   Future<List<Conversation>> getRecentConversations() async {
