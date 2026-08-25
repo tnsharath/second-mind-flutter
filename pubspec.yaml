@@ -56,6 +56,7 @@ dev_dependencies:
   json_serializable: ^6.9.0
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.1
+  analyzer: ^7.0.0
 
 # Run `dart run flutter_launcher_icons` after `flutter create` generates
 # the platform scaffolding (done automatically in CI).
