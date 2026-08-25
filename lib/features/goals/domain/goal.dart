@@ -10,8 +10,10 @@ class Goal with _$Goal {
     required String title,
     String? description,
     @Default(false) bool isCompleted,
+    @Default(0) int progress,
     DateTime? dueDate,
   }) = _Goal;
+
 
   factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
 }

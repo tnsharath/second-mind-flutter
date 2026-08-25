@@ -20,6 +20,7 @@ class GoalsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goals = ref.watch(todayGoalsProvider);
+    final filter = useState<_GoalFilter>(_GoalFilter.active);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Goals')),
@@ -27,35 +28,63 @@ class GoalsScreen extends HookConsumerWidget {
         onPressed: () => _showGoalFormSheet(context, ref),
         child: const Icon(Icons.add_rounded),
       ),
-      body: goals.when(
-        loading: () => const AuraLoading(),
-        error: (_, __) => AuraErrorView(
-          message: 'Goals could not be loaded.',
-          onRetry: () => ref.invalidate(todayGoalsProvider),
-        ),
-        data: (list) {
-          if (list.isEmpty) {
-            return const AuraEmptyView(
-              title: 'No goals yet',
-              message: 'Tap + to add something AURA can help you finish.',
-              icon: Icons.flag_outlined,
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(todayGoalsProvider),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
-              children: [
-                for (final goal in list) _GoalTile(goal: goal),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: SegmentedButton<_GoalFilter>(
+              segments: const [
+                ButtonSegment(value: _GoalFilter.active, label: Text('Active')),
+                ButtonSegment(value: _GoalFilter.completed, label: Text('Done')),
+                ButtonSegment(value: _GoalFilter.all, label: Text('All')),
               ],
+              selected: {filter.value},
+              onSelectionChanged: (selected) => filter.value = selected.first,
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: goals.when(
+              loading: () => const AuraLoading(),
+              error: (_, __) => AuraErrorView(
+                message: 'Goals could not be loaded.',
+                onRetry: () => ref.invalidate(todayGoalsProvider),
+              ),
+              data: (list) {
+                final filtered = list.where((g) {
+                  return switch (filter.value) {
+                    _GoalFilter.active => !g.isCompleted,
+                    _GoalFilter.completed => g.isCompleted,
+                    _GoalFilter.all => true,
+                  };
+                }).toList();
+
+                if (filtered.isEmpty) {
+                  return const AuraEmptyView(
+                    title: 'No goals found',
+                    message: 'Tap + to add something AURA can help you finish.',
+                    icon: Icons.flag_outlined,
+                  );
+                }
+                return RefreshIndicator(
+                  onRefresh: () async => ref.invalidate(todayGoalsProvider),
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
+                    children: [
+                      for (final goal in filtered) _GoalTile(goal: goal),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
-
 }
+
+enum _GoalFilter { active, completed, all }
+
 
 Future<void> _showGoalFormSheet(
   BuildContext context,
@@ -295,6 +324,33 @@ class _GoalTile extends ConsumerWidget {
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: (goal.progress.clamp(0, 100)) / 100,
+                              minHeight: 6,
+                              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                goal.isCompleted
+                                    ? theme.colorScheme.secondary
+                                    : theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          '${goal.progress}%',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                     if (goal.dueDate != null) ...[
                       const SizedBox(height: 6),
                       Text(
@@ -307,6 +363,7 @@ class _GoalTile extends ConsumerWidget {
                   ],
                 ),
               ),
+
             ],
           ),
         ),

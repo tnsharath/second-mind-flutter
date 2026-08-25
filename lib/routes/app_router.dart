@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/application/auth_controller.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/briefing/presentation/briefing_screen.dart';
+import '../features/calendar/presentation/calendar_screen.dart';
 import '../features/conversation/presentation/conversation_screen.dart';
+
 import '../features/focus/presentation/focus_screen.dart';
 import '../features/goals/presentation/goals_screen.dart';
 import '../features/habits/presentation/habits_screen.dart';
@@ -37,6 +39,7 @@ class AppRoutes {
   static const String focus = '/focus';
   static const String search = '/search';
   static const String projects = '/projects';
+  static const String calendar = '/calendar';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -116,9 +119,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       // Pushed on top of the shell (no bottom nav).
       GoRoute(
+        path: AppRoutes.calendar,
+        builder: (context, state) => const CalendarScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.voice,
         builder: (context, state) => const VoiceModeScreen(),
       ),
+
       GoRoute(
         path: AppRoutes.briefing,
         builder: (context, state) => const BriefingScreen(),

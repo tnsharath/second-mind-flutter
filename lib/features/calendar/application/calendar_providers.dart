@@ -19,6 +19,61 @@ final calendarRepositoryProvider = Provider<CalendarRepository>((ref) {
   }
 });
 
-final upcomingEventsProvider = FutureProvider<List<CalendarEvent>>(
-  (ref) => ref.watch(calendarRepositoryProvider).getUpcomingEvents(),
+final upcomingEventsProvider =
+    AsyncNotifierProvider<CalendarEventsController, List<CalendarEvent>>(
+  CalendarEventsController.new,
 );
+
+class CalendarEventsController extends AsyncNotifier<List<CalendarEvent>> {
+  CalendarRepository get _repository => ref.read(calendarRepositoryProvider);
+
+  @override
+  Future<List<CalendarEvent>> build() => _repository.getUpcomingEvents();
+
+  Future<CalendarEvent> create({
+    required String title,
+    required DateTime start,
+    DateTime? end,
+    String? location,
+  }) async {
+    final current = state.valueOrNull ?? const [];
+    try {
+      final created = await _repository.createEvent(
+        title: title,
+        start: start,
+        end: end,
+        location: location,
+      );
+      state = AsyncData([...current, created]);
+      return created;
+    } catch (_) {
+      state = AsyncData(current);
+      rethrow;
+    }
+  }
+
+  Future<void> updateEvent(CalendarEvent event) async {
+    final current = state.valueOrNull ?? const [];
+    try {
+      final updated = await _repository.updateEvent(event);
+      state = AsyncData([
+        for (final e in current) if (e.id == updated.id) updated else e,
+      ]);
+    } catch (_) {
+      state = AsyncData(current);
+      rethrow;
+    }
+  }
+
+  Future<void> delete(String id) async {
+    final current = state.valueOrNull ?? const [];
+    try {
+      await _repository.deleteEvent(id);
+      state = AsyncData([for (final e in current) if (e.id != id) e]);
+    } catch (_) {
+      state = AsyncData(current);
+      rethrow;
+    }
+  }
+}
+

@@ -25,30 +25,36 @@ class SseChatRepository implements ChatRepository {
     final body = response.data;
     if (body == null) return;
 
-    final lines = utf8.decoder
-        .bind(body.stream)
-        .transform(const LineSplitter());
-    await for (final line in lines) {
-      if (!line.startsWith('data:')) continue;
-      final payload = line.substring(5).trim();
-      if (payload.isEmpty) continue;
-      if (payload == '[DONE]') return;
+    try {
+      final lines = utf8.decoder
+          .bind(body.stream)
+          .transform(const LineSplitter());
+      await for (final line in lines) {
+        if (!line.startsWith('data:')) continue;
+        final payload = line.substring(5).trim();
+        if (payload.isEmpty) continue;
+        if (payload == '[DONE]') return;
 
-      final Map<String, dynamic> chunk;
-      try {
-        chunk = jsonDecode(payload) as Map<String, dynamic>;
-      } on FormatException {
-        continue; // ignore non-JSON keep-alive lines
-      }
+        final Map<String, dynamic> chunk;
+        try {
+          chunk = jsonDecode(payload) as Map<String, dynamic>;
+        } on FormatException {
+          continue; // ignore non-JSON keep-alive lines
+        }
 
-      final error = chunk['error'];
-      if (error is String && error.isNotEmpty) {
-        throw AppFailure(error);
+        final error = chunk['error'];
+        if (error is String && error.isNotEmpty) {
+          throw AppFailure(error);
+        }
+        final delta = chunk['delta'];
+        if (delta is String && delta.isNotEmpty) yield delta;
       }
-      final delta = chunk['delta'];
-      if (delta is String && delta.isNotEmpty) yield delta;
+    } catch (e) {
+      if (e is AppFailure) rethrow;
+      throw AppFailure('Stream disconnected: ${e.toString()}');
     }
   }
+
 
   @override
   Future<List<Conversation>> getRecentConversations() async {

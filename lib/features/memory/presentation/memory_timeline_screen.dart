@@ -12,6 +12,9 @@ import '../application/memory_providers.dart';
 import '../domain/memory_item.dart';
 import 'widgets/memory_detail_sheet.dart';
 
+import '../../../core/shared/widgets/aura_bottom_sheet.dart';
+import '../../../core/shared/widgets/aura_button.dart';
+
 class MemoryTimelineScreen extends HookConsumerWidget {
   const MemoryTimelineScreen({super.key});
 
@@ -22,7 +25,13 @@ class MemoryTimelineScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Memory timeline')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddMemorySheet(context, ref),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Add memory'),
+      ),
       body: Column(
+
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
@@ -101,7 +110,9 @@ class _MemoryTile extends StatelessWidget {
     MemoryCategory.preference: (Icons.tune_rounded, Color(0xFF6EE7F9)),
     MemoryCategory.note: (Icons.notes_rounded, Color(0xFFFBBF24)),
     MemoryCategory.milestone: (Icons.emoji_events_outlined, Color(0xFFF472B6)),
+    MemoryCategory.reflection: (Icons.self_improvement_rounded, Color(0xFFA78BFA)),
   };
+
 
   @override
   Widget build(BuildContext context) {
@@ -159,3 +170,88 @@ class _MemoryTile extends StatelessWidget {
     );
   }
 }
+
+Future<void> _showAddMemorySheet(BuildContext context, WidgetRef ref) async {
+  final result = await AuraBottomSheet.show<
+      ({String title, String description, MemoryCategory category, bool isImportant})>(
+    context,
+    title: 'New Memory',
+    child: const _AddMemoryForm(),
+  );
+  if (result == null || result.title.trim().isEmpty) return;
+
+  await ref.read(memoriesProvider.notifier).create(
+        title: result.title.trim(),
+        description: result.description.trim(),
+        category: result.category,
+        isImportant: result.isImportant,
+      );
+}
+
+class _AddMemoryForm extends HookWidget {
+  const _AddMemoryForm();
+
+  @override
+  Widget build(BuildContext context) {
+    final title = useTextEditingController();
+    final description = useTextEditingController();
+    final category = useState<MemoryCategory>(MemoryCategory.note);
+    final isImportant = useState<bool>(false);
+
+    void submit() {
+      final t = title.text.trim();
+      if (t.isEmpty) return;
+      Navigator.of(context).pop((
+        title: t,
+        description: description.text.trim(),
+        category: category.value,
+        isImportant: isImportant.value,
+      ));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AuraTextField(
+          controller: title,
+          hint: 'Memory title',
+          autofocus: true,
+        ),
+        const SizedBox(height: 12),
+        AuraTextField(
+          controller: description,
+          hint: 'Details (optional)',
+          minLines: 3,
+          maxLines: 5,
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<MemoryCategory>(
+          value: category.value,
+          decoration: const InputDecoration(
+            labelText: 'Category',
+            border: OutlineInputBorder(),
+          ),
+          items: [
+            for (final cat in MemoryCategory.values)
+              DropdownMenuItem(
+                value: cat,
+                child: Text(cat.name.toUpperCase()),
+              ),
+          ],
+          onChanged: (val) {
+            if (val != null) category.value = val;
+          },
+        ),
+        const SizedBox(height: 10),
+        CheckboxListTile(
+          title: const Text('Mark as important / star'),
+          value: isImportant.value,
+          onChanged: (val) => isImportant.value = val ?? false,
+        ),
+        const SizedBox(height: 16),
+        AuraButton(label: 'Save memory', onPressed: submit),
+      ],
+    );
+  }
+}
+

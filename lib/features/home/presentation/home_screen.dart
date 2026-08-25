@@ -20,9 +20,11 @@ import 'widgets/memory_highlights_card.dart';
 import 'widgets/quick_actions.dart';
 import 'widgets/recent_conversations_card.dart';
 import 'widgets/reflection_prompt_card.dart';
+import 'widgets/smart_quick_add_card.dart';
 import 'widgets/summary_card.dart';
 import 'widgets/weather_card.dart';
 import 'widgets/weekly_review_card.dart';
+
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -101,8 +103,11 @@ class HomeScreen extends HookConsumerWidget {
               const SizedBox(height: AppSpacing.md),
             ],
             GreetingHeader(now: now, name: user?.name ?? 'there'),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
+            const SmartQuickAddCard(),
+            const SizedBox(height: AppSpacing.md),
             const SummaryCard(),
+
             const SizedBox(height: AppSpacing.md),
             const WeatherCard(),
             const SizedBox(height: AppSpacing.md),

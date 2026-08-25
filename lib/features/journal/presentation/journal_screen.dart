@@ -3,10 +3,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/providers/providers.dart';
+import '../../../core/shared/widgets/aura_bottom_sheet.dart';
+import '../../../core/shared/widgets/aura_button.dart';
 import '../../../core/shared/widgets/aura_card.dart';
 import '../../../core/shared/widgets/aura_empty_view.dart';
 import '../../../core/shared/widgets/aura_error_view.dart';
 import '../../../core/shared/widgets/aura_loading.dart';
+import '../../../core/shared/widgets/aura_text_field.dart';
+import '../../memory/application/memory_providers.dart';
+import '../../memory/domain/memory_item.dart';
 import '../application/journal_providers.dart';
 import '../domain/day_journal.dart';
 import '../domain/journal_entry.dart';
@@ -25,7 +31,13 @@ class JournalScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Journal')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showNewJournalSheet(context, ref, selectedDate.value),
+        icon: const Icon(Icons.edit_note_rounded),
+        label: const Text('Journal entry'),
+      ),
       body: Column(
+
         children: [
           _DateNavigator(
             date: selectedDate.value,
@@ -321,3 +333,86 @@ class _EntryTile extends StatelessWidget {
     );
   }
 }
+
+Future<void> _showNewJournalSheet(
+  BuildContext context,
+  WidgetRef ref,
+  DateTime selectedDate,
+) async {
+  final result = await AuraBottomSheet.show<({String text, bool isReflection})>(
+    context,
+    title: 'New Journal Entry',
+    child: const _JournalEntryForm(),
+  );
+  if (result == null || result.text.trim().isEmpty) return;
+
+  final client = ref.read(apiClientProvider);
+  if (result.isReflection) {
+    await ref.read(memoriesProvider.notifier).create(
+          title: 'Daily Reflection',
+          description: result.text.trim(),
+          category: MemoryCategory.reflection,
+        );
+  } else {
+    await client.post<void>(
+      '/journal',
+      body: {'text': result.text.trim(), 'kind': 'journal'},
+    );
+  }
+  ref.invalidate(journalProvider(selectedDate));
+}
+
+class _JournalEntryForm extends HookWidget {
+  const _JournalEntryForm();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = useTextEditingController();
+    final isReflection = useState(false);
+
+    void submit() {
+      final text = controller.text.trim();
+      if (text.isEmpty) return;
+      Navigator.of(context).pop((text: text, isReflection: isReflection.value));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            FilterChip(
+              selected: !isReflection.value,
+              label: const Text('Journal note'),
+              onSelected: (val) => isReflection.value = !val,
+            ),
+            const SizedBox(width: 8),
+            FilterChip(
+              selected: isReflection.value,
+              label: const Text('Reflection'),
+              onSelected: (val) => isReflection.value = val,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        AuraTextField(
+          controller: controller,
+          hint: isReflection.value
+              ? 'Reflect on your day, achievements, or feelings...'
+              : 'Write down what happened today...',
+          minLines: 4,
+          maxLines: 8,
+          autofocus: true,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
+        ),
+        const SizedBox(height: 16),
+        AuraButton(
+          label: isReflection.value ? 'Save reflection' : 'Save journal entry',
+          onPressed: submit,
+        ),
+      ],
+    );
+  }
+}
+

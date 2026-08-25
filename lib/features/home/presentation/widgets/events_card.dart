@@ -7,6 +7,9 @@ import '../../../../core/shared/widgets/aura_loading.dart';
 import '../../../../core/shared/widgets/section_header.dart';
 import '../../../calendar/application/calendar_providers.dart';
 
+import 'package:go_router/go_router.dart';
+import '../../../../routes/app_router.dart';
+
 class EventsCard extends HookConsumerWidget {
   const EventsCard({super.key});
 
@@ -15,11 +18,18 @@ class EventsCard extends HookConsumerWidget {
     final events = ref.watch(upcomingEventsProvider);
     final theme = Theme.of(context);
     return AuraCard(
+      onTap: () => context.push(AppRoutes.calendar),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(title: 'Upcoming events'),
+          SectionHeader(
+            title: 'Upcoming events',
+            actionLabel: 'View all',
+            onAction: () => context.push(AppRoutes.calendar),
+          ),
+
           const SizedBox(height: 8),
+
           events.when(
             data: (list) {
               if (list.isEmpty) {

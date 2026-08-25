@@ -90,15 +90,19 @@ class ChatController extends Notifier<ChatState> {
       }
       _updateAssistant(assistantMessage.id, buffer.toString(), MessageStatus.sent);
     } catch (_) {
+      final msg = buffer.isNotEmpty
+          ? '${buffer.toString()}\n[Stream disconnected]'
+          : 'Something went wrong while reaching AURA. Please try again.';
       _updateAssistant(
         assistantMessage.id,
-        'Something went wrong while reaching AURA. Please try again.',
+        msg,
         MessageStatus.error,
       );
     } finally {
       state = state.copyWith(isResponding: false);
       unawaited(_maybeCaptureMemory(text));
     }
+
   }
 
   Future<void> _maybeCaptureMemory(String text) async {

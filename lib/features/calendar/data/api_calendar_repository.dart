@@ -17,6 +17,44 @@ class ApiCalendarRepository implements CalendarRepository {
         .map((json) => CalendarEvent.fromJson(_normalizeId(json)))
         .toList();
   }
+
+  @override
+  Future<CalendarEvent> createEvent({
+    required String title,
+    required DateTime start,
+    DateTime? end,
+    String? location,
+  }) async {
+    final response = await _client.post<Map<String, dynamic>>(
+      '/calendar',
+      body: {
+        'title': title,
+        'start': start.toIso8601String(),
+        if (end != null) 'end': end.toIso8601String(),
+        if (location != null) 'location': location,
+      },
+    );
+    return CalendarEvent.fromJson(_normalizeId(response.data!));
+  }
+
+  @override
+  Future<CalendarEvent> updateEvent(CalendarEvent event) async {
+    final response = await _client.patch<Map<String, dynamic>>(
+      '/calendar/${event.id}',
+      body: {
+        'title': event.title,
+        'start': event.start.toIso8601String(),
+        if (event.end != null) 'end': event.end!.toIso8601String(),
+        'location': event.location,
+      },
+    );
+    return CalendarEvent.fromJson(_normalizeId(response.data!));
+  }
+
+  @override
+  Future<void> deleteEvent(String id) async {
+    await _client.delete<void>('/calendar/$id');
+  }
 }
 
 /// Backend ids are integers; the Dart models use String ids.
@@ -24,3 +62,4 @@ Map<String, dynamic> _normalizeId(Map<String, dynamic> json) => {
       ...json,
       'id': json['id'].toString(),
     };
+

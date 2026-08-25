@@ -25,6 +25,32 @@ class DeviceCalendarRepository implements CalendarRepository {
     return _merge(results[0], results[1]);
   }
 
+  @override
+  Future<CalendarEvent> createEvent({
+    required String title,
+    required DateTime start,
+    DateTime? end,
+    String? location,
+  }) async {
+    return _backend.createEvent(
+      title: title,
+      start: start,
+      end: end,
+      location: location,
+    );
+  }
+
+  @override
+  Future<CalendarEvent> updateEvent(CalendarEvent event) async {
+    return _backend.updateEvent(event);
+  }
+
+  @override
+  Future<void> deleteEvent(String id) async {
+    await _backend.deleteEvent(id);
+  }
+
+
   Future<List<CalendarEvent>> _loadBackendEvents() async {
     try {
       return await _backend.getUpcomingEvents();
